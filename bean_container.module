@@ -1,0 +1,121 @@
+<?php
+
+/**
+ * @file
+ * Bean container module.
+ */
+
+/**
+ * Hook Implementations.
+ */
+
+/**
+ * Implements hook_bean_types_api_info().
+ */
+function bean_container_bean_types_api_info() {
+  return array(
+    'api' => bean_current_version(),
+  );
+}
+
+/**
+ * Implements hook_bean_types().
+ */
+function bean_container_bean_types() {
+  $plugins = array();
+  $plugin_path = drupal_get_path('module', 'bean_container');
+
+  $plugins['bean_container'] = array(
+    'label' => t('Bean Container'),
+    'handler' => array(
+      'class' => 'BeanContainer',
+      'parent' => 'BeanPlugin',
+    ),
+    'path' => $plugin_path,
+    'file' => 'bean_container.bean.inc',
+    'editable' => TRUE,
+  );
+
+  return $plugins;
+}
+
+/**
+ * Implements hook_menu().
+ */
+function bean_container_menu() {
+  $items = array();
+
+  $items['block/%bean_delta/manage-children'] = array(
+    'title' => 'Manage Children',
+    'type' => MENU_LOCAL_TASK,
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bean_container_manage_children', 1),
+    'access callback' => 'bean_container_menu_access',
+    'access arguments' => array(1),
+    'file' => 'bean_container.admin.inc',
+  );
+
+  $items['block/%bean_delta/manage-children/add-block'] = array(
+    'title' => 'Add block',
+    'type' => MENU_LOCAL_ACTION,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('bean_container_add_block', 1),
+    'access callback' => 'bean_container_menu_access',
+    'access arguments' => array(1),
+    'file' => 'bean_container.admin.inc',
+  );
+
+
+  return $items;
+}
+
+/**
+ * Implements hook_admin_paths().
+ */
+function bean_container_admin_paths() {
+  $paths = array(
+    'block/*/add-block' => TRUE,
+    'block/*/manage-children' => TRUE,
+  );
+  return $paths;
+}
+
+/**
+ * Implements hook_theme().
+ */
+function bean_container_theme($existing, $type, $theme, $path) {
+  return array(
+    'bean_container_children_form' => array(
+      'render element' => 'form',
+    ),
+  );
+}
+
+/**
+ * Menu access callback for add a block form.
+ */
+function bean_container_menu_access($bean) {
+  return $bean->type == 'bean_container' && bean_access('edit', $bean);
+}
+
+/**
+ * API functions.
+ */
+
+/**
+ * Return the available bean types to include in a bean container.
+ */
+function bean_containers_get_types() {
+  $types = &drupal_static(__FUNCTION__, array());
+
+  if (empty($types)) {
+    $_types = bean_get_types();
+    foreach ($_types as $k => $v) {
+      $types[$k] = $v->getLabel();
+    }
+    drupal_alter('bean_containers_types', $types);
+  }
+
+  return $types;
+}
