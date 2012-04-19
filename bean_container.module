@@ -30,9 +30,9 @@ function bean_container_bean_types() {
     'handler' => array(
       'class' => 'BeanContainer',
       'parent' => 'BeanPlugin',
+      'file' => 'bean_container.bean.inc',
+      'path' => $plugin_path,
     ),
-    'path' => $plugin_path,
-    'file' => 'bean_container.bean.inc',
     'editable' => TRUE,
   );
 
