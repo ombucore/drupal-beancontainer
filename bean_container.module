@@ -107,8 +107,8 @@ function bean_container_menu_access($bean) {
  */
 function template_preprocess_bean_container(&$variables) {
   $path = drupal_get_path('module', 'bean_container');
-  drupal_add_js($path . 'bean_container.js');
-  drupal_add_css($path . 'bean_container.css');
+  drupal_add_js($path . '/bean_container.js');
+  drupal_add_css($path . '/bean_container.css');
 }
 
 /**
