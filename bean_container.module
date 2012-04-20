@@ -26,7 +26,7 @@ function bean_container_bean_types() {
   $plugin_path = drupal_get_path('module', 'bean_container');
 
   $plugins['bean_container'] = array(
-    'label' => t('Bean Container'),
+    'label' => t('Tabbed Panel'),
     'handler' => array(
       'class' => 'BeanContainer',
       'parent' => 'BeanPlugin',
@@ -89,6 +89,9 @@ function bean_container_theme($existing, $type, $theme, $path) {
     'bean_container_children_form' => array(
       'render element' => 'form',
     ),
+    'bean_container' => array(
+      'variables' => array('children' => NULL),
+    ),
   );
 }
 
@@ -97,6 +100,56 @@ function bean_container_theme($existing, $type, $theme, $path) {
  */
 function bean_container_menu_access($bean) {
   return $bean->type == 'bean_container' && bean_access('edit', $bean);
+}
+
+/**
+ * Implements hook_preprocess_bean_container().
+ */
+function template_preprocess_bean_container(&$variables) {
+  $path = drupal_get_path('module', 'bean_container');
+  drupal_add_js($path . 'bean_container.js');
+  drupal_add_css($path . 'bean_container.css');
+}
+
+/**
+ * Theme a bean container.
+ */
+function theme_bean_container($variables) {
+  $children = $variables['children'];
+  $output = '';
+
+  $nav = array();
+  $items = array();
+  foreach ($children as $key => $child) {
+    // Generate nav.
+    $nav[] = array(
+      'data' => $child->title,
+      'class' => array('nav-' . $key),
+    );
+
+    // Generate items.
+    $content = $child->view();
+    $items[] = array(
+      'data' => drupal_render($content),
+      'class' => array('item-' . $key),
+    );
+  }
+
+  $output .= theme('item_list', array(
+    'items' => $nav,
+    'attributes' => array(
+      'class' => array('item-nav'),
+    ),
+  ));
+
+  $output .= theme('item_list', array(
+    'items' => $items,
+    'attributes' => array(
+      'class' => array('bean-container-tabs'),
+    ),
+  ));
+
+  return $output;
 }
 
 /**
