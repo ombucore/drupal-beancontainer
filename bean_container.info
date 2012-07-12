@@ -3,4 +3,4 @@ description = A bean that can act as a container for other beans
 version = 7.x-0.1
 core = 7.x
 
-files[] = bean_container.bean.inc
+files[] = includes/BeanContainer.php

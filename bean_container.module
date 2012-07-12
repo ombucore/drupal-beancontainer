@@ -23,14 +23,14 @@ function bean_container_bean_types_api_info() {
  */
 function bean_container_bean_types() {
   $plugins = array();
-  $plugin_path = drupal_get_path('module', 'bean_container');
+  $plugin_path = drupal_get_path('module', 'bean_container') . '/includes';
 
   $plugins['bean_container'] = array(
     'label' => t('Tabbed Panel'),
     'handler' => array(
       'class' => 'BeanContainer',
       'parent' => 'BeanPlugin',
-      'file' => 'bean_container.bean.inc',
+      'file' => 'BeanContainer.php',
       'path' => $plugin_path,
     ),
     'editable' => TRUE,
