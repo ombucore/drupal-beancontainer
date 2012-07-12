@@ -18,7 +18,6 @@ function bean_container_manage_children($form, &$form_state, $bean_container) {
   if (!empty($bean_container->children)) {
     $weight = 0;
     $form['children'] = array(
-      '#theme' => 'bean_container_children_form',
       '#tree' => TRUE,
     );
     foreach ($bean_container->children as $child) {
@@ -200,7 +199,7 @@ function bean_container_add_form_add_submit($form, &$form_state) {
  * Theme container children as a reorderable list in the container bean edit
  * form.
  */
-function theme_bean_container_children_form($variables) {
+function theme_bean_container_manage_children($variables) {
   $form = $variables['form'];
 
   $header = array(
@@ -210,14 +209,15 @@ function theme_bean_container_children_form($variables) {
     array('data' => t('Operations'), 'colspan' => 2),
   );
   $rows = array();
-  foreach (element_children($form) as $key) {
-    if (isset($form[$key]['#bean'])) {
-      $bean = $form[$key]['#bean'];
+  $destination = drupal_get_destination();
+  foreach (element_children($form['children']) as $key) {
+    if (isset($form['children'][$key]['#bean'])) {
+      $bean = $form['children'][$key]['#bean'];
       $row = array();
       $row[] = check_plain($bean->title);
       $row[] = check_plain($bean->typeName());
-      $row[] = drupal_render($form[$key]['weight']);
-      $row[] = l(t('edit'), $bean->editURL()) . ' ' . l(t('delete'), $bean->deleteURL());
+      $row[] = drupal_render($form['children'][$key]['weight']);
+      $row[] = l(t('edit'), $bean->editURL(), array('query' => $destination)) . ' ' . l(t('delete'), $bean->deleteURL(), array('query' => $destination));
       $rows[] = array('data' => $row, 'class' => array('draggable'));
     }
   }
