@@ -18,6 +18,20 @@ class BeanContainer extends BeanPlugin {
   }
 
   /**
+   * @see: parent::form().
+   */
+  public function form($bean, $form, &$form_state) {
+    $form = parent::form($bean, $form, $form_state);
+
+    $form['children'] = array(
+      '#type' => 'value',
+      '#value' => $bean->children,
+    );
+
+    return $form;
+  }
+
+  /**
    * Return the block content.
    *
    * @param $bean
