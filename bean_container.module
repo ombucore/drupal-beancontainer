@@ -90,7 +90,7 @@ function bean_container_theme($existing, $type, $theme, $path) {
       'render element' => 'form',
     ),
     'bean_container' => array(
-      'variables' => array('children' => NULL),
+      'variables' => array('children' => NULL, 'display_type' => NULL, 'parent' => NULL),
     ),
   );
 }
@@ -106,10 +106,10 @@ function bean_container_menu_access($bean) {
  * Implements hook_preprocess_bean_container().
  */
 function template_preprocess_bean_container(&$variables) {
-  $path = drupal_get_path('module', 'bean_container');
-  $bootstrap_path = drupal_get_path('theme', 'betterbase') . '/bootstrap';
-  drupal_add_js($bootstrap_path . '/js/bootstrap-tab.js');
-  drupal_add_css($path . '/bean_container.css');
+  // $path = drupal_get_path('module', 'bean_container');
+  // $bootstrap_path = drupal_get_path('theme', 'betterbase') . '/bootstrap';
+  // drupal_add_js($bootstrap_path . '/js/bootstrap-tab.js');
+  // drupal_add_css($path . '/bean_container.css');
 }
 
 /**
@@ -118,6 +118,16 @@ function template_preprocess_bean_container(&$variables) {
 function theme_bean_container($variables) {
   $children = $variables['children'];
   $output = '';
+
+  // @todo: change this into theme_bean_container_empty function.
+  if (empty($children)) {
+    if (user_access('edit any bean_container bean')) {
+      $output .= t('This is an empty block container. You can add blocks to it by clicking <a href="!url">"Manage Children"</a> on the container cog menu', array(
+        '!url' => $variables['parent']->viewURL() . '/manage-children',
+      ));
+    }
+    return $output;
+  }
 
   $nav = array();
   $items = array();

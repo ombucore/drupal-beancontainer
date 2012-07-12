@@ -13,6 +13,7 @@ class BeanContainer extends BeanPlugin {
     $values = parent::values();
 
     $values['children'] = array();
+    $values['display_type'] = 'simple';
 
     return $values;
   }
@@ -26,6 +27,17 @@ class BeanContainer extends BeanPlugin {
     $form['children'] = array(
       '#type' => 'value',
       '#value' => $bean->children,
+    );
+
+    // @todo: make this pluggable.
+    $form['display_type'] = array(
+      '#type' => 'select',
+      '#title' => t('Display type'),
+      '#options' => array(
+        'simple' => t('Invisible Container'),
+        'tab' => t('Tabbed Panel'),
+      ),
+      '#default_value' => $bean->display_type,
     );
 
     return $form;
@@ -57,9 +69,12 @@ class BeanContainer extends BeanPlugin {
       }
     }
 
+    // @todo: implement different themes based on display_type.
     $content['bean'][$bean->bid]['children'] = array(
       '#theme' => 'bean_container',
       '#children' => $children,
+      '#display_type' => $bean->display_type,
+      '#parent' => $bean,
     );
 
     return $content;
