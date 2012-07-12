@@ -130,6 +130,9 @@ function theme_bean_container($variables) {
 
     // Generate items.
     $content = $child->view();
+    $content['#prefix'] = '<div class="' . drupal_clean_css_identifier($child->type) . '">';
+    $content['#suffix'] = '</div>';
+
     $items[] = array(
       'data' => drupal_render($content),
       'class' => array('item-' . $key),
