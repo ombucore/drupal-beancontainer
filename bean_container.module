@@ -30,9 +30,11 @@ function bean_container_bean_types() {
     'handler' => array(
       'class' => 'BeanContainer',
       'parent' => 'BeanPlugin',
-      'file' => 'BeanContainer.php',
       'path' => $plugin_path,
+      'file' => 'BeanContainer.php',
     ),
+    'file' => 'BeanContainer.php',
+    'path' => $plugin_path,
     'editable' => TRUE,
   );
 
@@ -164,6 +166,21 @@ function theme_bean_container($variables) {
   ));
 
   return $output;
+}
+
+/**
+ * Implements hook_entity_delete().
+ */
+function bean_container_entity_delete($entity, $type) {
+  // Delete bean children when deleting container.
+  // @todo: should probably make this configurable.
+  if ($type == 'bean' && $entity->type == 'bean_container') {
+    foreach ($entity->children as $child) {
+      if ($bean = bean_load($child)) {
+        bean_delete($bean);
+      }
+    }
+  }
 }
 
 /**

@@ -201,34 +201,37 @@ function bean_container_add_form_add_submit($form, &$form_state) {
  */
 function theme_bean_container_manage_children($variables) {
   $form = $variables['form'];
+  $output = '';
 
-  $header = array(
-    t('Title'),
-    t('Type'),
-    t('Weight'),
-    array('data' => t('Operations'), 'colspan' => 2),
-  );
-  $rows = array();
-  $destination = drupal_get_destination();
-  foreach (element_children($form['children']) as $key) {
-    if (isset($form['children'][$key]['#bean'])) {
-      $bean = $form['children'][$key]['#bean'];
-      $row = array();
-      $row[] = check_plain($bean->title);
-      $row[] = check_plain($bean->typeName());
-      $row[] = drupal_render($form['children'][$key]['weight']);
-      $row[] = l(t('edit'), $bean->editURL(), array('query' => $destination)) . ' ' . l(t('delete'), $bean->deleteURL(), array('query' => $destination));
-      $rows[] = array('data' => $row, 'class' => array('draggable'));
+  if (isset($form['children'])) {
+    $header = array(
+      t('Title'),
+      t('Type'),
+      t('Weight'),
+      array('data' => t('Operations'), 'colspan' => 2),
+    );
+    $rows = array();
+    $destination = drupal_get_destination();
+    foreach (element_children($form['children']) as $key) {
+      if (isset($form['children'][$key]['#bean'])) {
+        $bean = $form['children'][$key]['#bean'];
+        $row = array();
+        $row[] = check_plain($bean->title);
+        $row[] = check_plain($bean->typeName());
+        $row[] = drupal_render($form['children'][$key]['weight']);
+        $row[] = l(t('edit'), $bean->editURL(), array('query' => $destination)) . ' ' . l(t('delete'), $bean->deleteURL(), array('query' => $destination));
+        $rows[] = array('data' => $row, 'class' => array('draggable'));
+      }
     }
+
+    drupal_add_tabledrag('bean-container-children', 'order', 'sibling', 'bean-container-weight');
+
+    $output = theme('table', array(
+      'header' => $header,
+      'rows' => $rows,
+      'attributes' => array('id' => 'bean-container-children'),
+    ));
   }
-
-  drupal_add_tabledrag('bean-container-children', 'order', 'sibling', 'bean-container-weight');
-
-  $output = theme('table', array(
-    'header' => $header,
-    'rows' => $rows,
-    'attributes' => array('id' => 'bean-container-children'),
-  ));
   $output .= drupal_render_children($form);
 
   return $output;
