@@ -63,7 +63,7 @@ class BeanContainer extends BeanPlugin {
       $i = 1;
       foreach ($bean->children as $child) {
         $child_bean = bean_load($child);
-        if (bean_access('view', $child_bean)) {
+        if ($child_bean && bean_access('view', $child_bean)) {
           $children[] = $child_bean;
         }
       }

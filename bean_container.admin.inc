@@ -22,6 +22,9 @@ function bean_container_manage_children($form, &$form_state, $bean_container) {
     );
     foreach ($bean_container->children as $child) {
       $child_bean = bean_load($child);
+      if (!$child_bean) {
+        continue;
+      }
       $form['children'][$child]['#bean'] = $child_bean;
       $form['children'][$child]['#weight'] = $weight;
       $form['children'][$child]['weight'] = array(
