@@ -5,7 +5,7 @@
  * Bean plugin object for bean container.
  */
 
-class BeanContainer extends BeanPlugin {
+class BeanContainer extends ombubeans_color {
   /**
    * @see: parent::values().
    */
