@@ -29,14 +29,14 @@ class BeanContainer extends BeanPlugin {
       '#value' => $bean->children,
     );
 
-    // @todo: make this pluggable.
+    foreach (bean_container_get_style() as $k => $v) {
+      $styles[$k] = $v['label'];
+    }
+
     $form['display_type'] = array(
       '#type' => 'select',
       '#title' => t('Display type'),
-      '#options' => array(
-        'simple' => t('Invisible Container'),
-        'tab' => t('Tabbed Panel'),
-      ),
+      '#options' => $styles,
       '#default_value' => $bean->display_type,
     );
 
@@ -69,9 +69,9 @@ class BeanContainer extends BeanPlugin {
       }
     }
 
-    // @todo: implement different themes based on display_type.
-    $content['bean'][$bean->bid]['children'] = array(
-      '#theme' => 'bean_container',
+    $style = bean_container_get_style($bean->display_type);
+    $content['bean'][$bean->delta]['children'] = array(
+      '#theme' => $style['theme_function'],
       '#children' => $children,
       '#display_type' => $bean->display_type,
       '#parent' => $bean,
