@@ -97,6 +97,9 @@ function bean_container_theme($existing, $type, $theme, $path) {
     'bean_container_tabs' => array(
       'variables' => array('children' => NULL, 'display_type' => NULL, 'parent' => NULL),
     ),
+    'bean_container_item' => array(
+      'variables' => array('item' => NULL, 'title' => TRUE),
+    ),
   );
 }
 
@@ -108,19 +111,36 @@ function bean_container_menu_access($bean) {
 }
 
 /**
+ * Theme an individual container item.
+ */
+function theme_bean_container_item($variables) {
+  $child = $variables['item'];
+
+  if ($child) {
+    $content = $child->view();
+
+    $content['#prefix'] = '<div class="' . drupal_clean_css_identifier($child->type) . '">';
+
+    if ($variables['title'] && !empty($child->title)) {
+      $content['#prefix'] .= '<h2>' . $child->title . '</h2>';
+    }
+
+    $content['#suffix'] = '</div>';
+
+    return drupal_render($content);
+  }
+}
+
+/**
  * Theme a simple bean container.
  */
 function theme_bean_container_simple($variables) {
   $output = '';
   foreach ($children as $key => $child) {
-    $content = $child->view();
-    $content['#prefix'] = '<div class="' . drupal_clean_css_identifier($child->type) . '">';
-    if (!empty($child->title)) {
-      $content['#prefix'] .= '<h2>' . $child->title . '</h2>';
-    }
-    $content['#suffix'] = '</div>';
-    $output .= drupal_render($content);
+    $output .= theme('bean_container_item', array('item' => $child));
   }
+
+  return $output;
 }
 
 /**
