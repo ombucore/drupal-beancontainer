@@ -136,7 +136,7 @@ function theme_bean_container_item($variables) {
  */
 function theme_bean_container_simple($variables) {
   $output = '';
-  foreach ($children as $key => $child) {
+  foreach ($variables['children'] as $key => $child) {
     $output .= theme('bean_container_item', array('item' => $child));
   }
 
