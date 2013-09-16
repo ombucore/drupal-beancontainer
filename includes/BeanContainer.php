@@ -67,15 +67,22 @@ class BeanContainer extends BeanPlugin {
           $children[] = $child_bean;
         }
       }
-    }
 
-    $style = bean_container_get_style($bean->display_type);
-    $content['bean'][$bean->delta]['children'] = array(
-      '#theme' => $style['theme_function'],
-      '#children' => $children,
-      '#display_type' => $bean->display_type,
-      '#parent' => $bean,
-    );
+      $style = bean_container_get_style($bean->display_type);
+      $content['bean'][$bean->delta]['children'] = array(
+        '#theme' => $style['theme_function'],
+        '#children' => $children,
+        '#display_type' => $bean->display_type,
+        '#parent' => $bean,
+      );
+    }
+    elseif (user_access('edit any bean_container bean')) {
+      $content['bean'][$bean->delta]['empty'] = array(
+        '#markup' => t('This is an empty block container. You can add blocks to it by clicking <a href="!url">"Manage Children"</a> on the container cog menu', array(
+          '!url' => $bean->viewURL() . '/manage-children',
+        )),
+      );
+    }
 
     return $content;
   }
