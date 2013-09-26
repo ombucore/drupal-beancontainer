@@ -1,6 +1,6 @@
 name = Bean Container
 description = A bean that can act as a container for other beans
-version = 7.x-0.1
+version = 7.x-0.2
 core = 7.x
 
 files[] = includes/BeanContainer.php
