@@ -29,14 +29,14 @@ class BeanContainer extends BeanPlugin {
       '#value' => $bean->children,
     );
 
-    // @todo: make this pluggable.
+    foreach (bean_container_get_style() as $k => $v) {
+      $styles[$k] = $v['label'];
+    }
+
     $form['display_type'] = array(
       '#type' => 'select',
       '#title' => t('Display type'),
-      '#options' => array(
-        'simple' => t('Invisible Container'),
-        'tab' => t('Tabbed Panel'),
-      ),
+      '#options' => $styles,
       '#default_value' => $bean->display_type,
     );
 
@@ -67,15 +67,22 @@ class BeanContainer extends BeanPlugin {
           $children[] = $child_bean;
         }
       }
-    }
 
-    // @todo: implement different themes based on display_type.
-    $content['bean'][$bean->bid]['children'] = array(
-      '#theme' => 'bean_container',
-      '#children' => $children,
-      '#display_type' => $bean->display_type,
-      '#parent' => $bean,
-    );
+      $style = bean_container_get_style($bean->display_type);
+      $content['bean'][$bean->delta]['children'] = array(
+        '#theme' => $style['theme_function'],
+        '#children' => $children,
+        '#display_type' => $bean->display_type,
+        '#parent' => $bean,
+      );
+    }
+    elseif (user_access('edit any bean_container bean')) {
+      $content['bean'][$bean->delta]['empty'] = array(
+        '#markup' => t('This is an empty block container. You can add blocks to it by clicking <a href="!url">"Manage Children"</a> on the container cog menu', array(
+          '!url' => $bean->viewURL() . '/manage-children',
+        )),
+      );
+    }
 
     return $content;
   }

@@ -91,8 +91,14 @@ function bean_container_theme($existing, $type, $theme, $path) {
     'bean_container_manage_children' => array(
       'render element' => 'form',
     ),
-    'bean_container' => array(
+    'bean_container_simple' => array(
       'variables' => array('children' => NULL, 'display_type' => NULL, 'parent' => NULL),
+    ),
+    'bean_container_tabs' => array(
+      'variables' => array('children' => NULL, 'display_type' => NULL, 'parent' => NULL),
+    ),
+    'bean_container_item' => array(
+      'variables' => array('item' => NULL, 'title' => TRUE),
     ),
   );
 }
@@ -105,67 +111,46 @@ function bean_container_menu_access($bean) {
 }
 
 /**
- * Implements hook_preprocess_bean_container().
+ * Theme an individual container item.
  */
-function template_preprocess_bean_container(&$variables) {
-  // $path = drupal_get_path('module', 'bean_container');
-  // $bootstrap_path = drupal_get_path('theme', 'betterbase') . '/bootstrap';
-  // drupal_add_js($bootstrap_path . '/js/bootstrap-tab.js');
-  // drupal_add_css($path . '/bean_container.css');
+function theme_bean_container_item($variables) {
+  $child = $variables['item'];
+
+  if ($child) {
+    $content = $child->view();
+
+    $content['#prefix'] = '<div class="' . drupal_clean_css_identifier($child->type) . '">';
+
+    if ($variables['title'] && !empty($child->title)) {
+      $content['#prefix'] .= '<h2>' . $child->title . '</h2>';
+    }
+
+    $content['#suffix'] = '</div>';
+
+    return drupal_render($content);
+  }
 }
 
 /**
- * Theme a bean container.
+ * Theme a simple bean container.
  */
-function theme_bean_container($variables) {
-  $children = $variables['children'];
+function theme_bean_container_simple($variables) {
   $output = '';
-
-  // @todo: change this into theme_bean_container_empty function.
-  if (empty($children)) {
-    if (user_access('edit any bean_container bean')) {
-      $output .= t('This is an empty block container. You can add blocks to it by clicking <a href="!url">"Manage Children"</a> on the container cog menu', array(
-        '!url' => url($variables['parent']->url() . '/manage-children'),
-      ));
-    }
-    return $output;
+  foreach ($variables['children'] as $key => $child) {
+    $output .= theme('bean_container_item', array('item' => $child));
   }
-
-  $nav = array();
-  $items = array();
-  foreach ($children as $key => $child) {
-    // Generate nav.
-    $nav[] = array(
-      'data' => $child->title,
-      'class' => array('nav-' . $key),
-    );
-
-    // Generate items.
-    $content = $child->view();
-    $content['#prefix'] = '<div class="' . drupal_clean_css_identifier($child->type) . '">';
-    $content['#suffix'] = '</div>';
-
-    $items[] = array(
-      'data' => drupal_render($content),
-      'class' => array('item-' . $key),
-    );
-  }
-
-  $output .= theme('item_list', array(
-    'items' => $nav,
-    'attributes' => array(
-      'class' => array('item-nav'),
-    ),
-  ));
-
-  $output .= theme('item_list', array(
-    'items' => $items,
-    'attributes' => array(
-      'class' => array('bean-container-tabs'),
-    ),
-  ));
 
   return $output;
+}
+
+/**
+ * Theme a tabbed bean container.
+ *
+ * Use the simple bean container theme and let themes implement their own tabbed
+ * interfaces.
+ */
+function theme_bean_container_tabs($variables) {
+  return theme('bean_container_simple', $variables);
 }
 
 /**
@@ -181,6 +166,22 @@ function bean_container_entity_delete($entity, $type) {
       }
     }
   }
+}
+
+/**
+ * Implements hook_bean_container_styles().
+ */
+function bean_container_bean_container_styles() {
+  return array(
+    'simple' => array(
+      'label' => t('Invisible Container'),
+      'theme_function' => 'bean_container_simple',
+    ),
+    'tab' => array(
+      'label' => t('Tabbed Panel'),
+      'theme_function' => 'bean_container_tabs',
+    ),
+  );
 }
 
 /**
@@ -202,4 +203,18 @@ function bean_containers_get_types() {
   }
 
   return $types;
+}
+/**
+ * Get bean container styles
+ *
+ * $style The style key. If empty, returns all styles
+ */
+function bean_container_get_style($style = NULL) {
+  $styles = module_invoke_all('bean_container_styles');
+  if ($style) {
+    return $styles[$style];
+  }
+  else {
+    return $styles;
+  }
 }
