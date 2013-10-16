@@ -77,10 +77,11 @@ function bean_container_add_block($form, &$form_state, $bean_container) {
   }
 
   if (empty($form_state['next_step'])) {
+    $tile_options = tiles_get_tile_types_options();
     $form['block_type'] = array(
       '#type' => 'select',
       '#title' => t('Block Type'),
-      '#options' => array('' => 'Select One') + bean_containers_get_types(),
+      '#options' => array('' => 'Select One') + $tile_options['bean types'] + $tile_options['blocks'],
       '#description' => t("Choose the type of block you'd like to add"),
       '#required' => TRUE,
     );
