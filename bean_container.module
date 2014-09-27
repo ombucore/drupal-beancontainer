@@ -197,7 +197,9 @@ function bean_containers_get_types() {
   if (empty($types)) {
     $_types = bean_get_types();
     foreach ($_types as $k => $v) {
-      $types[$k] = $v->getLabel();
+      if (user_access("edit any $k bean")) {
+        $types[$k] = $v->getLabel();
+      }
     }
     drupal_alter('bean_containers_types', $types);
   }
