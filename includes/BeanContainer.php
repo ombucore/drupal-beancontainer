@@ -79,7 +79,7 @@ class BeanContainer extends BeanPlugin {
     elseif (user_access('edit any bean_container bean')) {
       $content['bean'][$bean->delta]['empty'] = array(
         '#markup' => t('This is an empty block container. You can add blocks to it by clicking <a href="!url">"Manage Children"</a> on the container cog menu', array(
-          '!url' => $bean->viewURL() . '/manage-children',
+          '!url' => $bean->url() . '/manage-children',
         )),
       );
     }
