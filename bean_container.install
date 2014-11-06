@@ -1,0 +1,41 @@
+<?php
+
+/**
+ * @file
+ * Install/update hooks for bean_container.module.
+ */
+
+/**
+ * Update path from old bean containers to new API.
+ */
+function bean_container_update_7001() {
+  $bids = db_query('SELECT bid FROM {bean} WHERE type = "bean_container"')->fetchCol();
+  $beans = bean_load_multiple($bids);
+
+  foreach ($beans as $bean) {
+    if ($bean->children) {
+      $children = bean_load_multiple($bean->children);
+
+      $layout = entity_create('tile_layout', array('container' => 'bean_container'));
+      $layout->selector = $bean->delta;
+
+      $weight = 0;
+      foreach ($children as $child) {
+        $child->weight = $weight++;
+        $layout->addBlock($child);
+      }
+
+      $layout->save();
+      unset($bean->children);
+
+      $bean_style = entity_create('bean_style', array(
+        'bid' => $bean->bid,
+        'type' => $bean->display_type == 'tab' ? 'bean_container_tabbed' : 'bean_container',
+      ));
+      $bean_style->save();
+      unset($bean->display_type);
+
+      $bean->save();
+    }
+  }
+}
