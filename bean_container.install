@@ -6,9 +6,11 @@
  */
 
 /**
- * Empty update function to ensure caches are properly cleared.
+ * Make sure registry is rebuilt to avoid upgrade troubles.
  */
 function bean_container_update_7000() {
+  module_enable(array('bean_style'));
+  drupal_flush_all_caches();
 }
 
 /**
@@ -36,11 +38,8 @@ function bean_container_update_7001() {
       $layout->save();
       unset($bean->data['children']);
 
-      $bean_style = entity_create('bean_style', array(
-        'bid' => $bean->bid,
-        'type' => $bean->data['display_type'] == 'tab' ? 'bean_container_tabbed' : 'bean_container',
-      ));
-      $bean_style->save();
+      $bean->bean_style = $bean->data['display_type'] == 'tab' ? 'bean_container_tabbed' : 'bean_container';
+
       unset($bean->data['display_type']);
 
       $bean->save();

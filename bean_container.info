@@ -3,6 +3,8 @@ description = A bean that can act as a container for other beans
 version = 7.x-0.2
 core = 7.x
 
+dependencies[] = bean_style
+
 files[] = includes/BeanContainer.php
 files[] = includes/TilesBeanContainer.php
 files[] = includes/BeanStyleBeanContainer.php
