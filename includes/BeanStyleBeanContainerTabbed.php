@@ -33,8 +33,10 @@ class BeanStyleBeanContainerTabbed extends BeanStyleBeanContainer {
     // For now, tabbed containers don't support block widths. It would be great
     // in the future if we would treat "rows" as tabs, so multiple blocks can
     // appear in a single tab.
-    foreach (element_children($this->items) as $child) {
-      $this->items[$child]['#block']->width = tiles_get_max_step();
+    if ($this->items) {
+      foreach (element_children($this->items) as $child) {
+        $this->items[$child]['#block']->width = tiles_get_max_step();
+      }
     }
   }
 }
