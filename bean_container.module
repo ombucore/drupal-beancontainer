@@ -47,60 +47,17 @@ function bean_container_bean_types() {
 function bean_container_menu() {
   $items = array();
 
-  $items['block/%bean_delta/manage-children'] = array(
-    'title' => 'Manage Children',
-    'type' => MENU_LOCAL_TASK,
-    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('bean_container_manage_children', 1),
-    'access callback' => 'bean_container_menu_access',
-    'access arguments' => array(1),
-    'file' => 'bean_container.admin.inc',
-  );
-
-  $items['block/%bean_delta/manage-children/add-block'] = array(
-    'title' => 'Add block',
+  $items['block/%bean_delta/add-block'] = array(
+    'title' => 'Add Block to Container',
     'type' => MENU_LOCAL_ACTION,
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('bean_container_add_block', 1),
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+    'page callback' => 'bean_container_add_tile',
+    'page arguments' => array(1),
     'access callback' => 'bean_container_menu_access',
     'access arguments' => array(1),
-    'file' => 'bean_container.admin.inc',
   );
-
 
   return $items;
-}
-
-/**
- * Implements hook_admin_paths().
- */
-function bean_container_admin_paths() {
-  $paths = array(
-    'block/*/add-block' => TRUE,
-    'block/*/manage-children' => TRUE,
-  );
-  return $paths;
-}
-
-/**
- * Implements hook_theme().
- */
-function bean_container_theme($existing, $type, $theme, $path) {
-  return array(
-    'bean_container_manage_children' => array(
-      'render element' => 'form',
-    ),
-    'bean_container_simple' => array(
-      'variables' => array('children' => NULL, 'display_type' => NULL, 'parent' => NULL),
-    ),
-    'bean_container_tabs' => array(
-      'variables' => array('children' => NULL, 'display_type' => NULL, 'parent' => NULL),
-    ),
-    'bean_container_item' => array(
-      'variables' => array('item' => NULL, 'title' => TRUE),
-    ),
-  );
 }
 
 /**
@@ -111,36 +68,57 @@ function bean_container_menu_access($bean) {
 }
 
 /**
- * Theme an individual container item.
+ * Implements hook_admin_paths().
  */
-function theme_bean_container_item($variables) {
-  $child = $variables['item'];
+function bean_container_admin_paths() {
+  return array(
+    'block/*/add-block' => TRUE,
+  );
+}
 
-  if ($child) {
-    $content = $child->view();
-
-    $content['#prefix'] = '<div class="' . drupal_clean_css_identifier($child->type) . '">';
-
-    if ($variables['title'] && !empty($child->title)) {
-      $content['#prefix'] .= '<h2>' . $child->title . '</h2>';
+/**
+ * Page callback for container add block contextual link.
+ *
+ * Redirects user to tiles add block form with appropriate layout id.
+ */
+function bean_container_add_tile($bean) {
+  // Keep user in overlay.
+  $url = 'admin/tiles/add/bean_container/' . $bean->delta;
+  if (module_exists('overlay') && overlay_get_mode() == 'child') {
+    // Fix Safari bug that improperly redirects destination if destination is
+    // the front page (e.g. node/1 will be redirected to / but loose overlay
+    // context).
+    if ($_GET['destination'] == variable_get('site_frontpage', '')) {
+      $_GET['destination'] = '<front>';
     }
-
-    $content['#suffix'] = '</div>';
-
-    return drupal_render($content);
+    overlay_close_dialog($_GET['destination'], array(
+      'fragment' => 'overlay=' . urlencode($url . '?destination=' . $_GET['destination']),
+      'absolute' => TRUE,
+    ));
+  }
+  else {
+    drupal_goto($url, array('query' => array('destination' => $_GET['destination'])));
   }
 }
 
 /**
- * Theme a simple bean container.
+ * Implements hook_theme().
  */
-function theme_bean_container_simple($variables) {
-  $output = '';
-  foreach ($variables['children'] as $key => $child) {
-    $output .= theme('bean_container_item', array('item' => $child));
-  }
+function bean_container_theme() {
+  return array(
+    'bean_container_tabs' => array(
+      'variables' => array('children' => NULL, 'parent' => NULL),
+    ),
+  );
+}
 
-  return $output;
+/**
+ * Implements hook_tiles_container_info().
+ */
+function bean_container_tiles_container_info() {
+  return array(
+    'bean_container' => 'TilesBeanContainer',
+  );
 }
 
 /**
@@ -150,73 +128,36 @@ function theme_bean_container_simple($variables) {
  * interfaces.
  */
 function theme_bean_container_tabs($variables) {
-  return theme('bean_container_simple', $variables);
+  return drupal_render($variables['children']);
 }
 
 /**
- * Implements hook_entity_delete().
+ * Implements hook_bean_style_info().
  */
-function bean_container_entity_delete($entity, $type) {
-  // Delete bean children when deleting container.
-  // @todo: should probably make this configurable.
-  if ($type == 'bean' && $entity->type == 'bean_container') {
-    foreach ($entity->children as $child) {
-      if ($bean = bean_load($child)) {
-        bean_delete($bean);
-      }
-    }
-  }
-}
-
-/**
- * Implements hook_bean_container_styles().
- */
-function bean_container_bean_container_styles() {
+function bean_container_bean_style_info() {
   return array(
-    'simple' => array(
-      'label' => t('Invisible Container'),
-      'theme_function' => 'bean_container_simple',
+    'bean_container' => array(
+      'label'          => 'Stacked',
+      'class'          => 'BeanStyleBeanContainer',
+      'bean_types'     => array(
+        'bean_container',
+      ),
     ),
-    'tab' => array(
-      'label' => t('Tabbed Panel'),
-      'theme_function' => 'bean_container_tabs',
+    'bean_container_tabbed' => array(
+      'label'          => 'Tabbed (horizontal)',
+      'class'          => 'BeanStyleBeanContainerTabbed',
+      'bean_types'     => array(
+        'bean_container',
+      ),
     ),
   );
 }
 
 /**
- * API functions.
+ * Implements hook_bean_style_options_alter().
  */
-
-/**
- * Return the available bean types to include in a bean container.
- */
-function bean_containers_get_types() {
-  $types = &drupal_static(__FUNCTION__, array());
-
-  if (empty($types)) {
-    $_types = bean_get_types();
-    foreach ($_types as $k => $v) {
-      if (user_access("edit any $k bean")) {
-        $types[$k] = $v->getLabel();
-      }
-    }
-    drupal_alter('bean_containers_types', $types);
-  }
-
-  return $types;
-}
-/**
- * Get bean container styles
- *
- * $style The style key. If empty, returns all styles
- */
-function bean_container_get_style($style = NULL) {
-  $styles = module_invoke_all('bean_container_styles');
-  if ($style) {
-    return $styles[$style];
-  }
-  else {
-    return $styles;
+function bean_container_bean_style_options_alter(&$options, $context) {
+  if ($context['bean']->type == 'bean_container') {
+    unset($options['']);
   }
 }
