@@ -26,7 +26,7 @@ function bean_container_bean_types() {
   $plugin_path = drupal_get_path('module', 'bean_container') . '/includes';
 
   $plugins['bean_container'] = array(
-    'label' => t('Block Container'),
+    'label' => t('Tile Container'),
     'handler' => array(
       'class' => 'BeanContainer',
       'parent' => 'BeanPlugin',
@@ -48,7 +48,7 @@ function bean_container_menu() {
   $items = array();
 
   $items['block/%bean_delta/add-block'] = array(
-    'title' => 'Add Block to Container',
+    'title' => 'Add Tile to Container',
     'type' => MENU_LOCAL_ACTION,
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
     'page callback' => 'bean_container_add_tile',
@@ -135,7 +135,7 @@ function theme_bean_container_tabs($variables) {
  * Implements hook_bean_style_info().
  */
 function bean_container_bean_style_info() {
-  return array(
+  $styles = array(
     'bean_container' => array(
       'label'          => 'Stacked',
       'class'          => 'BeanStyleBeanContainer',
@@ -143,14 +143,19 @@ function bean_container_bean_style_info() {
         'bean_container',
       ),
     ),
-    'bean_container_tabbed' => array(
+  );
+
+  if (variable_get('bean_container_show_tab_style', FALSE)) {
+    $styles['bean_container_tabbed'] = array(
       'label'          => 'Tabbed (horizontal)',
       'class'          => 'BeanStyleBeanContainerTabbed',
       'bean_types'     => array(
         'bean_container',
       ),
-    ),
-  );
+    );
+  }
+
+  return $styles;
 }
 
 /**
