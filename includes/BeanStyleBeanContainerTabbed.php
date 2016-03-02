@@ -28,7 +28,7 @@ class BeanStyleBeanContainerTabbed extends BeanStyleBeanContainer {
     parent::prepareItems($build, $type);
 
     // Store flat list of renderable blocks, since tabs only need widths.
-    $this->items = $this->layout->getRenderBlocks('content');
+    $this->items = $this->layout->getRenderTiles('content');
 
     // For now, tabbed containers don't support block widths. It would be great
     // in the future if we would treat "rows" as tabs, so multiple blocks can
