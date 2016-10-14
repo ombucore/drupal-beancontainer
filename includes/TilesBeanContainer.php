@@ -19,20 +19,6 @@ class TilesBeanContainer extends TilesContainer {
   }
 
   /**
-   * Implements parent::getTileTypes().
-   *
-   * Override method to remove bean container as a viable option until a better
-   * way to handle nesting can be found.
-   */
-  public function getTileTypes() {
-    $types = parent::getTileTypes();
-
-    unset($types['bean types'][array_search('bean_container', $types['bean types'])]);
-
-    return $types;
-  }
-
-  /**
    * Implements parent::renderManifest().
    */
   protected function renderManifest($page) {
